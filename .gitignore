@@ -37,3 +37,15 @@ downloads/
 sstate-cache/
 toaster.sqlite
 .vscode/
+# Bỏ qua thư mục build khổng lồ của Yocto
+build/
+bitbake.lock
+
+# Bỏ qua các file tạm của Python và môi trường ảo
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Bỏ qua các file mô hình AI quá nặng (nên gửi riêng qua Drive hoặc dùng Git LFS)
+*.onnx
