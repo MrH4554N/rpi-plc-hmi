@@ -1,9 +1,12 @@
 SUMMARY = "HMI Application for PLC Control"
 LICENSE = "CLOSED"
 
+# 1. Khai báo thêm file mô hình và scaler vào SRC_URI
 SRC_URI = " \
     file://hmi_fx_ai.py \
     file://hmi-app.service \
+    file://model.onnx \
+    file://scaler.json \
 "
 
 inherit systemd
@@ -19,7 +22,24 @@ do_install() {
     # Copy service vào thư mục quản lý của systemd
     install -d ${D}${systemd_system_unitdir}
     install -m 0644 ${WORKDIR}/hmi-app.service ${D}${systemd_system_unitdir}/
+
+    # 2. Tạo thư mục /usr/share/hmi-app/ và copy model AI vào đó
+    install -d ${D}${datadir}/${PN}
+    install -m 0644 ${WORKDIR}/model.onnx ${D}${datadir}/${PN}/
+    install -m 0644 ${WORKDIR}/scaler.json ${D}${datadir}/${PN}/
 }
 
-# Khai báo các thư viện phụ thuộc để app có thể chạy
-RDEPENDS:${PN} += "python3-pyqt5 python3-pyserial python3-numpy python3-smbus2"
+# Khai báo các thư viện phụ thuộc
+RDEPENDS:${PN} += " \
+    python3-pyqt5 \
+    python3-pymodbus \
+    python3-paho-mqtt \
+    python3-numpy \
+    python3-smbus2 \
+    python3-pi-ina219 \
+    python3-onnxruntime \
+    python3-json \
+"
+
+# Đảm bảo Yocto gom cả thư mục /usr/share/hmi-app/ vào image cuối cùng
+FILES:${PN} += "${datadir}/${PN}/*"
