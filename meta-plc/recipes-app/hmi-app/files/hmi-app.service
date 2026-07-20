@@ -1,0 +1,19 @@
+[Unit]
+Description=HMI PLC Mitsubishi App
+After=weston.service
+Requires=weston.service
+
+[Service]
+Type=simple
+User=root
+# Ép PyQt5 chạy trên nền Wayland của Yocto
+Environment="QT_QPA_PLATFORM=wayland"
+Environment="XDG_RUNTIME_DIR=/run/user/0"
+ExecStart=/usr/bin/python3 /usr/bin/hmi_fx_ai.py
+# Tự động khởi động lại sau 5 giây nếu app bị văng (crash)
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+
