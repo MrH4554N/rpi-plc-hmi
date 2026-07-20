@@ -49,3 +49,10 @@ venv/
 
 # Bỏ qua các file mô hình AI quá nặng (nên gửi riêng qua Drive hoặc dùng Git LFS)
 *.onnx
+build/
+downloads/
+sstate-cache/
+bitbake.lock
+__pycache__/
+*.pyc
+*.onnx
