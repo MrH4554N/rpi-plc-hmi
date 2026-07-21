@@ -13,7 +13,7 @@ Environment="WAYLAND_DISPLAY=wayland-1"
 Environment="QT_QPA_PLATFORM=wayland"
 
 # Đường dẫn tới file Python chính của bạn (điều chỉnh lại nếu bạn để ở thư mục khác)
-ExecStart=/usr/bin/python3 /usr/bin/hmi_main.py
+ExecStart=/usr/bin/python3 /usr/bin/hmi_fx_ai.py
 
 # Nếu app bị crash (ví dụ mất kết nối Modbus đột ngột), tự động khởi động lại sau 5 giây
 Restart=on-failure

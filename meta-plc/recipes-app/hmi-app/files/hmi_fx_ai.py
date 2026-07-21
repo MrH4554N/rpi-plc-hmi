@@ -13,6 +13,8 @@ import pyqtgraph as pg
 from pymodbus.client import ModbusSerialClient
 import paho.mqtt.client as mqtt
 import onnxruntime as ort
+import numpy as np
+
 try:
     from ina219 import INA219 # Thư viện đọc cảm biến dòng/áp I2C
     INA219_AVAILABLE = True
@@ -103,14 +105,19 @@ class HardwareWorkerThread(QThread):
         except Exception as e:
             print(f"Không thể kết nối MQTT: {e}")
             
-        # 4. Khởi tạo AI Model (ONNX)
+        # 4. Khởi tạo AI Model (ONNX) và Scaler
         try:
-            #self.ort_session = ort.InferenceSession(MODEL_PATH)
-            session = onnxruntime.InferenceSession("/usr/share/hmi-app/model.onnx")
+            self.ort_session = ort.InferenceSession("/usr/share/hmi-app/model.onnx")
+            
+            # Đọc file scaler.json
+            with open("/usr/share/hmi-app/scaler.json", "r") as f:
+                self.scaler_data = json.load(f)
+                
             self.ai_ready = True
         except Exception as e:
-            print(f"Lỗi tải model ONNX: {e}")
+            print(f"Lỗi tải model ONNX hoặc Scaler: {e}")
             self.ai_ready = False
+            self.scaler_data = None
 
     def run(self):
         self.plc_client.connect()
@@ -148,9 +155,21 @@ class HardwareWorkerThread(QThread):
             self.ai_counter += 1
             if self.ai_counter >= 10 and self.ai_ready:
                 try:
-                    # Giả định model ONNX nhận đầu vào là [Điện áp, Dòng điện, Tốc độ hiện tại]
-                    input_data = [[voltage, current, current_speed]]
-                    ort_inputs = {self.ort_session.get_inputs()[0].name: input_data}
+                    # 1. Chuẩn hóa dữ liệu (Scaling)
+                    if self.scaler_data:
+                        # Thay thế (value - mean) / scale tương ứng cho 3 biến: Áp, Dòng, Tốc độ
+                        v_scaled = (voltage - self.scaler_data["mean"][0]) / self.scaler_data["scale"][0]
+                        i_scaled = (current - self.scaler_data["mean"][1]) / self.scaler_data["scale"][1]
+                        s_scaled = (current_speed - self.scaler_data["mean"][2]) / self.scaler_data["scale"][2]
+                        input_data = [[v_scaled, i_scaled, s_scaled]]
+                    else:
+                        input_data = [[voltage, current, current_speed]]
+                    
+                    # 2. Chuyển sang Float32 (Định dạng chuẩn của ONNX)
+                    input_array = np.array(input_data, dtype=np.float32)
+                    
+                    # 3. Chạy Inference
+                    ort_inputs = {self.ort_session.get_inputs()[0].name: input_array}
                     ort_outs = self.ort_session.run(None, ort_inputs)
                     
                     recommended_speed = int(ort_outs[0][0])
