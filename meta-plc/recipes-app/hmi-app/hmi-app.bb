@@ -14,7 +14,7 @@ SRC_URI = " \
 inherit systemd
 
 SYSTEMD_SERVICE:${PN} = "hmi-app.service"
-SYSTEMD_AUTO_ENABLE = "enable"
+SYSTEMD_AUTO_ENABLE:${PN} = "enable"
 
 do_install() {
     # Copy app python vào /usr/bin/
@@ -34,6 +34,8 @@ do_install() {
 # Khai báo các thư viện phụ thuộc
 RDEPENDS:${PN} += " \
     python3-pyqt5 \
+    qtwayland \
+    python3-pyqtgraph \
     python3-pymodbus \
     python3-paho-mqtt \
     python3-numpy \
@@ -43,5 +45,9 @@ RDEPENDS:${PN} += " \
     python3-json \
 "
 
-# Đảm bảo Yocto gom cả thư mục /usr/share/hmi-app/ vào image cuối cùng
-FILES:${PN} += "${datadir}/${PN}/*"
+# Đảm bảo Yocto gom tất cả vào image cuối cùng
+FILES:${PN} += " \
+    ${bindir}/hmi_fx_ai.py \
+    ${systemd_system_unitdir}/hmi-app.service \
+    ${datadir}/${PN}/* \
+"

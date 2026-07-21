@@ -105,7 +105,8 @@ class HardwareWorkerThread(QThread):
             
         # 4. Khởi tạo AI Model (ONNX)
         try:
-            self.ort_session = ort.InferenceSession(MODEL_PATH)
+            #self.ort_session = ort.InferenceSession(MODEL_PATH)
+            session = onnxruntime.InferenceSession("/usr/share/hmi-app/model.onnx")
             self.ai_ready = True
         except Exception as e:
             print(f"Lỗi tải model ONNX: {e}")
