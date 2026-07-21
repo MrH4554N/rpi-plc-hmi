@@ -1,6 +1,8 @@
 SUMMARY = "HMI Application for PLC Control"
 LICENSE = "CLOSED"
 
+S = "${UNPACKDIR}"
+
 # 1. Khai báo thêm file mô hình và scaler vào SRC_URI
 SRC_URI = " \
     file://hmi_fx_ai.py \
@@ -17,16 +19,16 @@ SYSTEMD_AUTO_ENABLE = "enable"
 do_install() {
     # Copy app python vào /usr/bin/
     install -d ${D}${bindir}
-    install -m 0755 ${WORKDIR}/hmi_fx_ai.py ${D}${bindir}/
+    install -m 0755 ${UNPACKDIR}/hmi_fx_ai.py ${D}${bindir}/
 
     # Copy service vào thư mục quản lý của systemd
     install -d ${D}${systemd_system_unitdir}
-    install -m 0644 ${WORKDIR}/hmi-app.service ${D}${systemd_system_unitdir}/
+    install -m 0644 ${UNPACKDIR}/hmi-app.service ${D}${systemd_system_unitdir}/
 
     # 2. Tạo thư mục /usr/share/hmi-app/ và copy model AI vào đó
     install -d ${D}${datadir}/${PN}
-    install -m 0644 ${WORKDIR}/model.onnx ${D}${datadir}/${PN}/
-    install -m 0644 ${WORKDIR}/scaler.json ${D}${datadir}/${PN}/
+    install -m 0644 ${UNPACKDIR}/model.onnx ${D}${datadir}/${PN}/
+    install -m 0644 ${UNPACKDIR}/scaler.json ${D}${datadir}/${PN}/
 }
 
 # Khai báo các thư viện phụ thuộc
