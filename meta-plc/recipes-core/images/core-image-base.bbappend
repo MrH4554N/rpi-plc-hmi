@@ -5,3 +5,4 @@ create_fw_env_config () {
 }
 
 ROOTFS_POSTPROCESS_COMMAND += "create_fw_env_config; "
+
